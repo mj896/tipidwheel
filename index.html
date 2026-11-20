@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TipidWheel - Smart Budget & Cravings Spinner</title>
+    <!-- PWA: installable at offline -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="TipidWheel">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for subtle sound effects (optional synthesized clicks/fanfare) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Canvas Confetti for celebratory wheel spin -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script src="js/tailwind-config.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 glass-card border-b border-slate-200 dark:border-slate-800 px-4 py-3 sm:px-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
+                    <i class="fa-solid fa-piggy-bank text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-600 to-amber-500 bg-clip-text text-transparent">
+                        TipidWheel
+                    </h1>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Auto-Save & Cravings Decider</p>
+                </div>
+            </div>
+
+            <!-- Right Controls: Avatar Mini-Badge, Sound Toggle, Theme Toggle & Reset -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="switchMainTab('avatar')" title="Customize My Avatar" class="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/70 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition">
+                    <div id="headerAvatarMini" class="w-7 h-7 rounded-xl overflow-hidden bg-white dark:bg-slate-800 flex items-center justify-center shadow-xs"></div>
+                    <span id="headerAvatarName" class="text-xs font-bold text-emerald-700 dark:text-emerald-300 hidden sm:inline">My Avatar</span>
+                </button>
+                <button id="soundToggle" title="Toggle Sound Effects" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+                <button id="themeToggle" title="Toggle Dark/Light Mode" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                    <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                </button>
+                <button id="resetAllBtn" class="px-3 py-2 rounded-xl text-xs font-semibold bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-5 sm:px-6 lg:py-7 space-y-6">
+
+        <!-- ========================================================= -->
+        <!-- TOP COMPANION BANNER: PERSONAL AVATAR + "TOL WAG MUNA"    -->
+        <!-- ========================================================= -->
+        <section class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 dark:border-slate-800">
+            <div class="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
+                <!-- Interactive Avatar Preview Box -->
+                <div class="relative shrink-0 group cursor-pointer" onclick="switchMainTab('avatar')" title="I-click para magpalit ng gupit at outfit!">
+                    <div id="companionAvatarBox" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-emerald-100 via-teal-50 to-amber-100 dark:from-emerald-950 dark:via-slate-800 dark:to-amber-950/60 border-2 border-emerald-300/70 dark:border-emerald-700/60 overflow-hidden shadow-md flex items-center justify-center transition transform group-hover:scale-105">
+                        <!-- SVG Avatar injected here -->
+                    </div>
+                    <span class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-slate-900 dark:bg-emerald-600 text-white text-[10px] font-bold shadow whitespace-nowrap">
+                        <i class="fa-solid fa-shirt mr-1"></i>Palit Look
+                    </span>
+                </div>
+
+                <!-- Speech Bubble & Custom Reminder Controls -->
+                <div class="flex-1 w-full">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span id="companionNameBadge" class="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                                <i class="fa-solid fa-comment-dots mr-1"></i> Paalala sa Sarili:
+                            </span>
+                            <span id="pinnedStatusBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300">
+                                <i class="fa-solid fa-thumbtack mr-1"></i>Active Note
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="cycleReminderMessage()" class="px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-slate-600 dark:text-slate-300 transition" title="Next paalala">
+                                <i class="fa-solid fa-shuffle mr-1"></i> Next Note
+                            </button>
+                            <button onclick="toggleReminderDrawer()" class="px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+                                <i class="fa-solid fa-pen-to-square mr-1"></i> Sulat ng "Tol Wag Muna"
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Prominent Speech Bubble -->
+                    <div class="relative p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50/70 to-emerald-50/60 dark:from-slate-800 dark:via-slate-800/90 dark:to-emerald-950/30 border border-amber-200/80 dark:border-slate-700">
+                        <p id="activeReminderBubbleText" class="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-100 leading-snug">
+                            "Tol wag muna, may ipon goals ka pa! Tiis-tiis muna sa budol."
+                        </p>
+                    </div>
+
+                    <!-- Collapsible Custom Reminder Manager Drawer -->
+                    <div id="reminderManagerDrawer" class="hidden mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-800 space-y-3">
+                        <form onsubmit="addCustomReminder(event)" class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="customReminderInput" maxlength="110"
+                                placeholder="Isulat ang paalala mo (e.g. Tol wag muna mag-checkout, sahod pa sa 30!)"
+                                class="flex-1 px-3.5 py-2 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500" />
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold transition whitespace-nowrap">
+                                <i class="fa-solid fa-plus mr-1"></i> I-Save Paalala
+                            </button>
+                        </form>
+
+                        <!-- Quick Preset Chips -->
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[11px] font-bold text-slate-400 mr-1">Presets:</span>
+                            <button type="button" onclick="quickAddReminder('Tol wag muna, isipin mo yung ipon goals mo!')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-slate-600 dark:text-slate-300 transition">+ Tol wag muna</button>
+                            <button type="button" onclick="quickAddReminder('Iwas budol muna bro, may nakain ka pa sa bahay!')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-slate-600 dark:text-slate-300 transition">+ Iwas budol</button>
+                            <button type="button" onclick="quickAddReminder('Tubig muna bago milk tea, tipid tayo ngayon!')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-slate-600 dark:text-slate-300 transition">+ Tubig muna</button>
+                            <button type="button" onclick="quickAddReminder('Malapit na yung upcoming event, magtabi ka na!')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-slate-600 dark:text-slate-300 transition">+ Para sa Event</button>
+                        </div>
+
+                        <!-- Saved Reminders List -->
+                        <div id="savedRemindersList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- UNIFIED NAVIGATION TABS (Desktop & Mobile)                -->
+        <!-- ========================================================= -->
+        <nav class="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 bg-slate-200/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+            <button id="navTab-budget" onclick="switchMainTab('budget')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-wallet"></i> <span>Smart Tipid</span>
+            </button>
+            <button id="navTab-wheel" onclick="switchMainTab('wheel')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-utensils"></i> <span>Spin Wheel</span>
+            </button>
+            <button id="navTab-collection" onclick="switchMainTab('collection')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-box-open"></i> <span>My Collection</span>
+                <span id="collectionCountBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500 text-white">0</span>
+            </button>
+            <button id="navTab-calendar" onclick="switchMainTab('calendar')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-calendar-days"></i> <span>Events</span>
+                <span id="upcomingEventsBadge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white">0</span>
+            </button>
+            <button id="navTab-avatar" onclick="switchMainTab('avatar')" class="col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-user-astronaut"></i> <span>My Avatar</span>
+            </button>
+        </nav>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 1 & 2: SMART TIPID & SPIN WHEEL (Side-by-Side on LG) -->
+        <!-- ========================================================= -->
+        <div id="mainBudgetWheelView" class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+            <!-- ========================================== -->
+            <!-- LEFT COLUMN: SMART MONEY & AUTO-SAVINGS    -->
+            <!-- ========================================== -->
+            <section id="budgetSection" class="lg:col-span-6 space-y-6">
+                
+                <!-- Money Input Card -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 mb-1">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Budget Engine
+                            </span>
+                            <h2 class="text-xl font-extrabold">Magkano ang pera mo ngayon?</h2>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Peso Input -->
+                        <div>
+                            <label for="moneyInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                                Total Cash / Allowance (₱)
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">₱</span>
+                                <input type="number" id="moneyInput" placeholder="e.g. 2500" min="1" step="any"
+                                    class="w-full pl-11 pr-4 py-3.5 text-2xl font-extrabold bg-slate-50 dark:bg-slate-800/80 border-2 border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 transition" />
+                            </div>
+                            <!-- Quick Preset Chips -->
+                            <div class="flex flex-wrap gap-2 mt-2.5">
+                                <button type="button" onclick="setQuickMoney(500)" class="px-3 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-slate-600 dark:text-slate-300 transition">+ ₱500</button>
+                                <button type="button" onclick="setQuickMoney(1000)" class="px-3 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-slate-600 dark:text-slate-300 transition">+ ₱1,000</button>
+                                <button type="button" onclick="setQuickMoney(3000)" class="px-3 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-slate-600 dark:text-slate-300 transition">+ ₱3,000</button>
+                                <button type="button" onclick="setQuickMoney(5000)" class="px-3 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-slate-600 dark:text-slate-300 transition">+ ₱5,000</button>
+                            </div>
+                        </div>
+
+                        <!-- Timeframe & Strategy Selectors -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label for="timeframeSelect" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                                    Hanggang kailan ito?
+                                </label>
+                                <select id="timeframeSelect" class="w-full px-3.5 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500">
+                                    <option value="1">Isang Araw (Daily)</option>
+                                    <option value="7" selected>1 Linggo (7 Days)</option>
+                                    <option value="15">Hanggang Katapusan (15 Days)</option>
+                                    <option value="30">Buong Buwan (30 Days)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="strategySelect" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                                    Tipid Mode Strategy
+                                </label>
+                                <select id="strategySelect" class="w-full px-3.5 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500">
+                                    <option value="balanced">Balanced (50% Needs / 30% Food / 20% Save)</option>
+                                    <option value="aggressive">Ipon Goals (40% Needs / 20% Food / 40% Save)</option>
+                                    <option value="survival">Petsa de Peligro (60% Needs / 25% Food / 15% Save)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="generatePlanBtn" onclick="generateSmartPlan()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/20 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-calculator"></i> I-Auto Budget & Mag-Save Na!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Auto-Savings Vault & Breakdown Card -->
+                <div id="planOutputCard" class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-5">
+                    
+                    <!-- Locked Auto-Savings Banner -->
+                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 p-5 text-white shadow-md">
+                        <div class="flex items-start justify-between relative z-10">
+                            <div>
+                                <div class="flex items-center gap-2 text-emerald-100 text-xs font-bold uppercase tracking-wider mb-1">
+                                    <i class="fa-solid fa-lock"></i> Auto-Saved Vault (Tabi Agad!)
+                                </div>
+                                <div id="autoSavedAmount" class="text-3xl sm:text-4xl font-extrabold tracking-tight">₱0.00</div>
+                                <p id="autoSavedSubtext" class="text-xs text-emerald-100/90 mt-1">
+                                    Awtomatikong itinabi ng system para hindi mo magastos!
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                        </div>
+                        <!-- Decorative circle -->
+                        <div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-white/10 pointer-events-none"></div>
+                    </div>
+
+                    <!-- Allocation Breakdown Grid -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">Smart Allocation Breakdown</h3>
+                            <span id="dailyAllowanceBadge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                ₱0 / araw
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <!-- Needs / Essentials -->
+                            <div class="p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
+                                <div class="flex items-center justify-between text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">
+                                    <span><i class="fa-solid fa-bus mr-1"></i> Needs / Pamasahe</span>
+                                    <span id="needsPct">50%</span>
+                                </div>
+                                <div id="needsAmount" class="text-lg font-extrabold text-slate-800 dark:text-slate-100">₱0.00</div>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Load, bills, transpo</p>
+                            </div>
+
+                            <!-- Food & Cravings Budget -->
+                            <div class="p-3.5 rounded-2xl bg-amber-50/90 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50">
+                                <div class="flex items-center justify-between text-amber-600 dark:text-amber-400 text-xs font-bold mb-1">
+                                    <span><i class="fa-solid fa-burger mr-1"></i> Food & Cravings</span>
+                                    <span id="foodPct">30%</span>
+                                </div>
+                                <div id="foodRemainingAmount" class="text-lg font-extrabold text-amber-600 dark:text-amber-400">₱0.00</div>
+                                <p id="foodTotalSub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Remaining sa kain</p>
+                            </div>
+
+                            <!-- Emergency / Extra Buffer -->
+                            <div class="p-3.5 rounded-2xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50">
+                                <div class="flex items-center justify-between text-purple-600 dark:text-purple-400 text-xs font-bold mb-1">
+                                    <span><i class="fa-solid fa-piggy-bank mr-1"></i> Total Savings</span>
+                                    <span id="savePct">20%</span>
+                                </div>
+                                <div id="saveAmountCard" class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">₱0.00</div>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Safe & untouched</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Food Budget Progress & Quick Expense Logger -->
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
+                                <i class="fa-solid fa-utensils text-amber-500 mr-1.5"></i> Food Budget Tracker
+                            </span>
+                            <span id="foodProgressText" class="text-xs font-bold text-slate-500 dark:text-slate-400">₱0 / ₱0 left</span>
+                        </div>
+                        <div class="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div id="foodProgressBar" class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500" style="width: 100%"></div>
+                        </div>
+
+                        <!-- Quick Deduct Expense -->
+                        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                            <input type="text" id="expenseNoteInput" placeholder="Saan gumastos? (e.g. Jollibee)" 
+                                class="flex-1 px-3 py-2 text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500" />
+                            <div class="flex gap-2">
+                                <div class="relative w-28 sm:w-32">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">₱</span>
+                                    <input type="number" id="expenseCostInput" placeholder="Amount" min="1"
+                                        class="w-full pl-7 pr-2 py-2 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500" />
+                                </div>
+                                <button onclick="logFoodExpense()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition whitespace-nowrap">
+                                    <i class="fa-solid fa-minus mr-1"></i> Bawas
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Expense Chips -->
+                        <div id="expenseHistoryList" class="flex flex-wrap gap-1.5 pt-1"></div>
+                    </div>
+
+                    <!-- Dynamic AI-Style Tipid Coach Advice -->
+                    <div class="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800/50">
+                        <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 text-xs font-extrabold uppercase tracking-wide mb-2">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i> Tipid Coach Advice para sa'yo:
+                        </div>
+                        <ul id="tipidTipsList" class="space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                            <li>• Ilagay ang pera mo sa itaas para makagawa ako ng personalized tipid plan!</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- RIGHT COLUMN: CRAVINGS SPIN THE WHEEL      -->
+            <!-- ========================================== -->
+            <section id="wheelSection" class="lg:col-span-6 space-y-6 hidden lg:block">
+                
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800">
+                    <!-- Header & Smart Budget Integration Badge -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 mb-1">
+                                <i class="fa-solid fa-burger"></i> Cravings Decider
+                            </span>
+                            <h2 class="text-xl font-extrabold">Hirap pumili ng kakainin? I-Spin na!</h2>
+                        </div>
+
+                        <!-- Live Food Budget Pill -->
+                        <div class="px-3.5 py-2 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/60 text-right">
+                            <div class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Food Budget Left</div>
+                            <div id="wheelBudgetDisplay" class="text-base font-extrabold text-slate-800 dark:text-slate-100">₱0.00</div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Meal Tier Recommendation Banner -->
+                    <div id="mealTierBanner" class="mb-5 px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800/90 text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-info text-amber-500 text-sm"></i>
+                        <span id="mealTierText">Mag-set muna ng budget sa kabila para malaman natin kung pang-Value Meal o Feast ka ngayon!</span>
+                    </div>
+
+                    <!-- Interactive Canvas Wheel Container -->
+                    <div class="relative flex flex-col items-center justify-center my-2">
+                        <!-- Top Pointer Triangle -->
+                        <div class="relative z-20 -mb-4 drop-shadow-md">
+                            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 34L4 6C3.2 4.4 4.4 2.5 6.2 2.5H29.8C31.6 2.5 32.8 4.4 32 6L18 34Z" fill="#EF4444" stroke="white" stroke-width="3"/>
+                            </svg>
+                        </div>
+
+                        <!-- Responsive Square Wrapper for Canvas -->
+                        <div id="wheelWrapper" class="relative w-full max-w-[340px] sm:max-w-[380px] aspect-square flex items-center justify-center">
+                            <canvas id="wheelCanvas" class="w-full h-full rounded-full shadow-xl border-4 border-white dark:border-slate-800 cursor-pointer"></canvas>
+                            
+                            <!-- Center Spin Hub Button -->
+                            <button id="centerSpinBtn" onclick="spinWheel()" class="absolute z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white dark:bg-slate-900 border-4 border-amber-500 shadow-lg flex flex-col items-center justify-center text-amber-600 dark:text-amber-400 font-extrabold text-xs sm:text-sm hover:scale-105 active:scale-95 transition">
+                                <span>SPIN</span>
+                                <i class="fa-solid fa-bolt text-[10px] text-amber-500"></i>
+                            </button>
+                        </div>
+
+                        <!-- Primary Spin CTA Button -->
+                        <button id="spinBtn" onclick="spinWheel()" class="mt-6 w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-extrabold text-base shadow-lg shadow-amber-500/25 active:scale-[0.98] transition flex items-center justify-center gap-2 animate-pulse-gentle">
+                            <i class="fa-solid fa-dharmachakra fa-spin-hover"></i> Spin the Fastfood Wheel!
+                        </button>
+                    </div>
+
+                    <!-- Customize Fastfood / Food List -->
+                    <div class="mt-6 pt-5 border-t border-slate-200/80 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                                <i class="fa-solid fa-list-check text-amber-500 mr-1.5"></i> Fastfood / Food Choices (<span id="choiceCount">8</span>)
+                            </h3>
+                            <button onclick="resetDefaultFoods()" class="text-xs font-semibold text-slate-400 hover:text-amber-500 transition">
+                                Restore Defaults
+                            </button>
+                        </div>
+
+                        <!-- Add New Food Input -->
+                        <form onsubmit="addFoodItem(event)" class="flex gap-2 mb-3">
+                            <input type="text" id="newFoodInput" placeholder="Magdagdag (e.g. Mang Inasal, Samgyup, Lugaw)..." maxlength="24"
+                                class="flex-1 px-3.5 py-2.5 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500" />
+                            <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-800 dark:bg-slate-700 hover:bg-amber-500 dark:hover:bg-amber-500 text-white text-xs sm:text-sm font-bold transition">
+                                <i class="fa-solid fa-plus mr-1"></i> Add
+                            </button>
+                        </form>
+
+                        <!-- Tags Container -->
+                        <div id="foodTagsContainer" class="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 3: INTERACTIVE EVENTS & BUDGET CALENDAR              -->
+        <!-- ========================================================= -->
+        <section id="calendarViewSection" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Monthly Calendar Grid (Left 7 cols) -->
+                <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 mb-1">
+                                <i class="fa-solid fa-calendar-check"></i> Events & Gala Planner
+                            </span>
+                            <h2 id="calendarMonthYearTitle" class="text-xl sm:text-2xl font-extrabold">November 2026</h2>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="changeCalendarMonth(-1)" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition" title="Previous Month">
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </button>
+                            <button onclick="goToTodayCalendar()" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-slate-700 dark:text-slate-200 transition">
+                                Today
+                            </button>
+                            <button onclick="changeCalendarMonth(1)" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition" title="Next Month">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Days of Week Header -->
+                    <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">
+                        <div class="text-rose-500">Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div class="text-indigo-500">Sat</div>
+                    </div>
+
+                    <!-- Calendar Days Grid -->
+                    <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2">
+                        <!-- Dynamically populated -->
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Gala / Lakad</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Bills / Bayarin</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Sahod / Allowance</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> School / Work / Other</span>
+                    </div>
+                </div>
+
+                <!-- Selected Date Event Form & Upcoming Events List (Right 5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <!-- Add Event Card -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-base font-extrabold">
+                                <i class="fa-solid fa-calendar-plus text-indigo-500 mr-1.5"></i> Event sa <span id="selectedDateDisplay" class="text-indigo-600 dark:text-indigo-400">Selected Date</span>
+                            </h3>
+                        </div>
+
+                        <form onsubmit="addCalendarEvent(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Ano ang ganap / event?</label>
+                                <input type="text" id="eventTitleInput" required maxlength="45" placeholder="e.g. Gala with tropa, Birthday, Sahod, Bayad Wifi"
+                                    class="w-full px-3.5 py-2.5 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Category</label>
+                                    <select id="eventCategorySelect" class="w-full px-3 py-2.5 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500">
+                                        <option value="gala">🎉 Gala / Handaan</option>
+                                        <option value="bills">🧾 Bills / Bayarin</option>
+                                        <option value="payday">💸 Sahod / Allowance</option>
+                                        <option value="other">📌 School / Work</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Est. Gastos / Pera (₱)</label>
+                                    <input type="number" id="eventBudgetInput" min="0" placeholder="e.g. 500"
+                                        class="w-full px-3 py-2.5 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500" />
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold shadow-md shadow-indigo-600/20 transition">
+                                <i class="fa-solid fa-plus mr-1"></i> I-Save sa Calendar
+                            </button>
+                        </form>
+
+                        <!-- Events on the Currently Selected Day -->
+                        <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">Mga Nakalista sa Araw na Ito:</h4>
+                            <div id="selectedDayEventsList" class="space-y-2">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- All Upcoming Events Summary -->
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-extrabold">
+                                <i class="fa-solid fa-bell text-amber-500 mr-1.5"></i> Upcoming Events & Budget Needed
+                            </h3>
+                            <span id="upcomingTotalEstBadge" class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+                                Est: ₱0
+                            </span>
+                        </div>
+                        <div id="upcomingEventsList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 4: PERSONAL AVATAR CHARACTER & WARDROBE STUDIO       -->
+        <!-- ========================================================= -->
+        <section id="avatarViewSection" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Live Avatar Stage (Left 5 cols) -->
+                <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 flex flex-col items-center text-center">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 mb-2">
+                        <i class="fa-solid fa-sparkles"></i> Personal Tipid Buddy
+                    </span>
+                    <h2 class="text-xl font-extrabold mb-1">I-Customize ang Character Mo!</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Piliin ang paborito mong gupit sa hair, outfit, at accessories.</p>
+
+                    <!-- Large Live SVG Stage -->
+                    <div id="studioAvatarStage" class="w-56 h-56 sm:w-64 sm:h-64 rounded-3xl bg-gradient-to-b from-emerald-100/80 via-teal-50/70 to-amber-100/80 dark:from-slate-800 dark:via-slate-800/90 dark:to-emerald-950/50 border-4 border-white dark:border-slate-700 shadow-xl flex items-center justify-center overflow-hidden mb-4">
+                        <!-- Large Avatar SVG rendered here -->
+                    </div>
+
+                    <!-- Character Name Input -->
+                    <div class="w-full max-w-xs space-y-3">
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Pangalan ng Character / Nickname</label>
+                            <input type="text" id="avatarNameInput" maxlength="20" placeholder="e.g. Boss Juan, Kuya Tipid"
+                                oninput="updateAvatarName(this.value)"
+                                class="w-full px-3.5 py-2 text-center text-sm font-extrabold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500" />
+                        </div>
+                        <button onclick="randomizeAvatar()" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-slate-700 dark:text-slate-200 text-xs font-extrabold transition">
+                            <i class="fa-solid fa-dice mr-1.5 text-amber-500"></i> Randomize Look!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Wardrobe & Barbershop Controls (Right 7 cols) -->
+                <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
+                    
+                    <!-- 1. Gupit sa Hair (Hairstyle) -->
+                    <div>
+                        <!-- Gender Selector: Lalaki or Babae -->
+                        <div class="mb-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div>
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                                    <i class="fa-solid fa-venus-mars text-indigo-500 mr-1"></i> Character Gender
+                                </span>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Piliin kung Lalaki o Babae ang avatar mo</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 w-full sm:w-56">
+                                <button type="button" id="genderBtn-male" onclick="setAvatarGender('male')" class="py-2 px-3 rounded-xl text-xs font-extrabold border-2 border-indigo-500 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 transition flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-mars"></i> Lalaki
+                                </button>
+                                <button type="button" id="genderBtn-female" onclick="setAvatarGender('female')" class="py-2 px-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-venus"></i> Babae
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-2.5">
+                            <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                                <i class="fa-solid fa-scissors text-emerald-500 mr-1.5"></i> Gupit sa Hair (Hairstyle)
+                            </h3>
+                            <span id="currentHairLabel" class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Low Taper Fade</span>
+                        </div>
+                        <div id="hairStyleOptions" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <!-- Buttons generated by JS -->
+                        </div>
+
+                        <!-- Hair Color Swatches -->
+                        <div class="mt-3 flex items-center gap-2.5">
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Kulay ng Buhok:</span>
+                            <div id="hairColorSwatches" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-100 dark:border-slate-800">
+
+                    <!-- 2. Outfits / Damitan -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2.5">
+                            <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                                <i class="fa-solid fa-shirt text-amber-500 mr-1.5"></i> Outfits / Damitan
+                            </h3>
+                            <span id="currentOutfitLabel" class="text-xs font-bold text-amber-600 dark:text-amber-400">Streetwear Hoodie</span>
+                        </div>
+                        <div id="outfitOptions" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <!-- Buttons generated by JS -->
+                        </div>
+
+                        <!-- Outfit Color Swatches -->
+                        <div class="mt-3 flex items-center gap-2.5">
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Kulay ng Damit:</span>
+                            <div id="outfitColorSwatches" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-100 dark:border-slate-800">
+
+                    <!-- 3. Skin Tone & Accessories -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Skin Tone</h3>
+                            <div id="skinToneSwatches" class="flex flex-wrap gap-2.5"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Accessories</h3>
+                            <div id="accessoryOptions" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 5: MY TOY COLLECTION VAULT (ANTI-DOBLE BILI!)        -->
+        <!-- ========================================================= -->
+        <section id="collectionViewSection" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Left 4 Cols: Add Toy / Figure Form with Photo Upload -->
+                <div class="lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 mb-1">
+                            <i class="fa-solid fa-shield-heart"></i> Anti-Doble Bili Vault
+                        </span>
+                        <h2 class="text-xl font-extrabold">I-Save ang Toy Collection</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Mag-upload ng photo ng toys mo para ma-check mo agad kung meron ka na bago bumili!
+                        </p>
+                    </div>
+
+                    <form onsubmit="addToyToCollection(event)" class="space-y-3.5">
+                        <!-- Photo Upload Box -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">Photo ng Toy / Figure</label>
+                            <label for="toyPhotoInput" class="relative flex flex-col items-center justify-center w-full h-44 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-emerald-500 cursor-pointer overflow-hidden transition group">
+                                <img id="toyPhotoPreview" src="" alt="Preview" class="hidden w-full h-full object-cover" />
+                                <div id="toyPhotoPlaceholder" class="flex flex-col items-center justify-center text-center p-4">
+                                    <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-camera text-lg"></i>
+                                    </div>
+                                    <span class="text-xs font-extrabold text-slate-700 dark:text-slate-200">Pumili o Mag-Capture ng Photo</span>
+                                    <span class="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP (Auto-compressed)</span>
+                                </div>
+                            </label>
+                            <input type="file" id="toyPhotoInput" accept="image/*" onchange="handleToyPhotoSelect(event)" class="hidden" />
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Pangalan ng Toy / Character *</label>
+                            <input type="text" id="toyNameInput" required maxlength="50" placeholder="e.g. Funko Pop Luffy Gear 5, Hot Wheels Supra"
+                                class="w-full px-3.5 py-2.5 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500" />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Category / Line</label>
+                                <select id="toyCategorySelect" class="w-full px-3 py-2.5 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500">
+                                    <option value="Funko / Vinyl">🧸 Funko / Vinyl</option>
+                                    <option value="Anime Figure">⚔️ Anime Figure</option>
+                                    <option value="Diecast / Cars">🏎️ Diecast / Cars</option>
+                                    <option value="Gundam / Model">🤖 Gundam / Model</option>
+                                    <option value="Blind Box / Plush">🎁 Blind Box / Plush</option>
+                                    <option value="Other Toy">🎲 Other Toy</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Presyo / Value (₱)</label>
+                                <input type="number" id="toyPriceInput" min="0" placeholder="e.g. 650"
+                                    class="w-full px-3 py-2.5 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Notes / Variant (Optional)</label>
+                            <input type="text" id="toyNotesInput" maxlength="60" placeholder="e.g. Chase edition, Nasa display cabinet"
+                                class="w-full px-3.5 py-2 text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500" />
+                        </div>
+
+                        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-extrabold shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus-circle"></i> Idagdag sa My Collection
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right 8 Cols: Visual Toy Gallery & Search Checker -->
+                <div class="lg:col-span-8 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-xl font-extrabold flex items-center gap-2">
+                                <i class="fa-solid fa-boxes-stacked text-emerald-500"></i> My Toy Collection Gallery
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">I-search dito bago mag-checkout sa mall o online shop!</p>
+                        </div>
+
+                        <!-- Collection Stats Pill -->
+                        <div class="flex items-center gap-2">
+                            <div class="px-3 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 text-right">
+                                <div class="text-[10px] font-bold uppercase text-slate-400">Total Items</div>
+                                <div id="collectionTotalItemsText" class="text-sm font-extrabold text-slate-800 dark:text-slate-100">0 pcs</div>
+                            </div>
+                            <div class="px-3 py-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-right">
+                                <div class="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400">Collection Value</div>
+                                <div id="collectionTotalValueText" class="text-sm font-extrabold text-emerald-700 dark:text-emerald-300">₱0.00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search & Category Filter Bar -->
+                    <div class="flex flex-col sm:flex-row gap-2.5">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                            <input type="text" id="collectionSearchInput" oninput="renderCollection()" placeholder="I-check kung meron ka na (e.g. Luffy, Supra, Gundam)..."
+                                class="w-full pl-9 pr-3.5 py-2.5 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500" />
+                        </div>
+                        <select id="collectionFilterCategory" onchange="renderCollection()" class="px-3.5 py-2.5 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500">
+                            <option value="ALL">All Categories</option>
+                            <option value="Funko / Vinyl">🧸 Funko / Vinyl</option>
+                            <option value="Anime Figure">⚔️ Anime Figure</option>
+                            <option value="Diecast / Cars">🏎️ Diecast / Cars</option>
+                            <option value="Gundam / Model">🤖 Gundam / Model</option>
+                            <option value="Blind Box / Plush">🎁 Blind Box / Plush</option>
+                            <option value="Other Toy">🎲 Other Toy</option>
+                        </select>
+                    </div>
+
+                    <!-- Gallery Grid -->
+                    <div id="collectionGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- Dynamically rendered toy cards -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Lightbox Modal for Viewing Toy Photo Fullscreen -->
+    <div id="toyLightboxModal" onclick="closeToyLightbox()" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div onclick="event.stopPropagation()" class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div class="relative bg-slate-100 dark:bg-slate-800 max-h-[65vh] flex items-center justify-center overflow-hidden">
+                <img id="lightboxToyImg" src="" alt="Toy Photo" class="w-full h-full object-contain max-h-[65vh]" />
+                <button onclick="closeToyLightbox()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-slate-900/70 text-white hover:bg-rose-500 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-4 sm:p-5 flex items-center justify-between gap-3">
+                <div>
+                    <span id="lightboxToyCat" class="text-[11px] font-extrabold uppercase text-emerald-600 dark:text-emerald-400">Category</span>
+                    <h3 id="lightboxToyTitle" class="text-lg font-extrabold text-slate-900 dark:text-white">Toy Name</h3>
+                    <p id="lightboxToyNotes" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"></p>
+                </div>
+                <div class="text-right shrink-0">
+                    <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                        <i class="fa-solid fa-check-circle mr-1"></i>MERON NA!
+                    </span>
+                    <div id="lightboxToyPrice" class="text-sm font-extrabold text-slate-700 dark:text-slate-200 mt-1">₱0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Spin Winner (Replaces alert()) -->
+    <div id="winnerModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-7 text-center shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all scale-95 opacity-0" id="winnerModalCard">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-500 flex items-center justify-center text-3xl shadow-inner">
+                🎉
+            </div>
+            <span class="text-xs font-extrabold uppercase tracking-widest text-amber-500">Naka-desisyon na ang Wheel!</span>
+            <h3 id="winnerNameText" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 mb-2">Jollibee</h3>
+            
+            <!-- Active "Tol Wag Muna" Reminder inside Winner Modal -->
+            <div id="modalTolReminderBox" class="mb-3 px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                💬 "Tol wag muna, may ipon goals ka pa!"
+            </div>
+
+            <div id="winnerBudgetAdvice" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/90 text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-5">
+                Tipid Tip: Sakto ang food budget mo! Stick to solo meals para may matira pa.
+            </div>
+
+            <!-- Optional Quick Deduct directly from Winner Modal -->
+            <div class="mb-5 text-left bg-amber-50/70 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200/70 dark:border-amber-900/50">
+                <label class="block text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase mb-1.5">
+                    Ibawas agad sa Food Budget? (Optional)
+                </label>
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">₱</span>
+                        <input type="number" id="modalDeductInput" placeholder="e.g. 120" min="1"
+                            class="w-full pl-7 pr-3 py-2 text-sm font-bold bg-white dark:bg-slate-900 border border-amber-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500" />
+                    </div>
+                    <button onclick="deductWinnerExpense()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
+                        Save & Bawas
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeWinnerModal(); spinWheel();" class="flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Spin Ulit
+                </button>
+                <button onclick="closeWinnerModal()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md shadow-amber-500/20 transition">
+                    G na! Kain na!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification (Replaces alert() for messages/errors) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Application Logic -->
+    <script src="js/app.js"></script>
+    <script src="js/pwa.js"></script>
+</body>
+</html>

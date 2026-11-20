@@ -1,0 +1,24 @@
+/* Custom scrollbar and smooth animations */
+body {
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+h1, h2, h3, .font-display {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.glass-card {
+    backdrop-filter: blur(12px);
+}
+@keyframes pulse-gentle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+.animate-pulse-gentle {
+    animation: pulse-gentle 2.5s infinite ease-in-out;
+}
+/* Hide number input arrows */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
