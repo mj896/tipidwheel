@@ -59,7 +59,9 @@
                 accessory: "none"        // none, glasses, headphones, cap, ribbon
             },
             // New Feature 4: My Toy Collection Vault
-            toys: [] // { id, name, category, price, notes, photoDataUrl, addedAt }
+            toys: [], // { id, name, category, price, notes, photoDataUrl, addedAt }
+            vault: { balance: 0, history: [] }, // piggy bank
+            dailySpends: [], planStart: '', dailyGoal: 0, dailyDate: '', mealPrices: {}, hiddenMeals: []
         };
 
         // Temporary holder for uploaded compressed photo DataURL
@@ -71,6 +73,7 @@
         function saveState() {
             try {
                 localStorage.setItem(STATE_KEY, JSON.stringify(appState));
+                if (typeof renderMonitor === 'function') renderMonitor();
             } catch (err) {
                 console.warn('Could not save state to localStorage:', err);
             }
@@ -88,7 +91,11 @@
                         foods: Array.isArray(parsed.foods) && parsed.foods.length > 0 ? parsed.foods : [...DEFAULT_FOODS],
                         reminders: Array.isArray(parsed.reminders) && parsed.reminders.length > 0 ? parsed.reminders : appState.reminders,
                         events: Array.isArray(parsed.events) ? parsed.events : [],
-                        toys: Array.isArray(parsed.toys) ? parsed.toys : []
+                        toys: Array.isArray(parsed.toys) ? parsed.toys : [],
+                        vault: { balance: Number(parsed.vault?.balance) || 0, history: Array.isArray(parsed.vault?.history) ? parsed.vault.history : [] },
+                        dailySpends: Array.isArray(parsed.dailySpends) ? parsed.dailySpends : [],
+                        mealPrices: parsed.mealPrices && typeof parsed.mealPrices === 'object' ? parsed.mealPrices : {},
+                        hiddenMeals: Array.isArray(parsed.hiddenMeals) ? parsed.hiddenMeals : []
                     };
                 }
             } catch (err) {
@@ -119,12 +126,26 @@
             }
         }
 
-        function generateSmartPlan() {
+        async function generateSmartPlan() {
             const input = document.getElementById('moneyInput');
             const rawVal = parseFloat(input?.value);
             if (isNaN(rawVal) || rawVal <= 0) {
                 showToast("Maglagay muna ng valid na halaga ng pera (₱)!", "error");
                 return;
+            }
+
+            // Galing ba sa Vault ang perang inilagay? (idadagdag lang ang tinanong kung dagdag sa dating total)
+            const added = rawVal - (appState.totalMoney || 0), vBal = appState.vault.balance;
+            if (added > 0 && vBal > 0) {
+                const fromVault = await askConfirm({
+                    title: 'Galing ba sa Vault?',
+                    msg: `Galing ba sa Vault (${formatPeso(vBal)}) ang ${formatPeso(added)}? Kapag Oo, awtomatiko itong ibabawas sa ipon mo. Kung bigay lang ito ng iba, piliin ang Hindi.`,
+                    yes: 'Oo, ibawas sa Vault', no: 'Hindi, galing sa iba'
+                });
+                if (fromVault) {
+                    if (added > vBal) { showToast('Kulang ang laman ng Vault para diyan.', 'error'); return; }
+                    vaultMove('out', added, 'Pang-budget (galing Vault)');
+                }
             }
 
             const days = parseInt(document.getElementById('timeframeSelect')?.value || '7', 10);
@@ -152,6 +173,7 @@
             appState.foodInitialBudget = rawVal * foodRatio;
             appState.foodSpent = 0;
             appState.expenses = [];
+            appState.planStart = formatDateISO(new Date());
 
             saveState();
             renderAll();
@@ -180,6 +202,16 @@
             showToast(`Nabawasan ng ${formatPeso(cost)} ang food budget.`, "info");
         }
 
+        // Gastos mula sa "Ngayong Araw" na kasama sa Smart Tipid (mula nang ginawa ang plan)
+        function dailySynced() {
+            const from = appState.planStart || '', ok = x => x.date >= from;
+            const foodItems = (appState.dailySpends || []).filter(x => x.kind === 'food' && ok(x)).map(x => ({ note: x.note, cost: x.amount }));
+            const sum = a => a.reduce((s, x) => s + (x.amount ?? x.price ?? 0), 0);
+            const needs = sum((appState.dailySpends || []).filter(x => x.kind === 'other' && ok(x))) + sum((appState.transport || []).filter(ok));
+            return { foodItems, food: foodItems.reduce((s, x) => s + x.cost, 0), needs };
+        }
+        const foodSpentAll = () => (appState.foodSpent || 0) + dailySynced().food;
+
         function renderBudgetUI() {
             const strategy = appState.strategy || 'balanced';
             let savePct = 20, needsPct = 50, foodPct = 30;
@@ -192,15 +224,15 @@
 
             document.getElementById('autoSavedAmount').textContent = formatPeso(appState.savedAmount);
             document.getElementById('saveAmountCard').textContent = formatPeso(appState.savedAmount);
-            document.getElementById('needsAmount').textContent = formatPeso(appState.needsAmount);
+            document.getElementById('needsAmount').textContent = formatPeso(Math.max(0, (appState.needsAmount || 0) - dailySynced().needs));
 
-            const foodRemaining = Math.max(0, (appState.foodInitialBudget || 0) - (appState.foodSpent || 0));
+            const foodRemaining = Math.max(0, (appState.foodInitialBudget || 0) - foodSpentAll());
             document.getElementById('foodRemainingAmount').textContent = formatPeso(foodRemaining);
             document.getElementById('foodTotalSub').textContent = `of ${formatPeso(appState.foodInitialBudget)} food budget`;
             document.getElementById('wheelBudgetDisplay').textContent = formatPeso(foodRemaining);
 
             const days = appState.days || 7;
-            const spendablePool = (appState.needsAmount || 0) + foodRemaining;
+            const spendablePool = Math.max(0, (appState.needsAmount || 0) - dailySynced().needs) + foodRemaining;
             const dailyAvg = spendablePool / days;
             document.getElementById('dailyAllowanceBadge').textContent = `${formatPeso(dailyAvg)} / araw (${days}d)`;
 
@@ -227,7 +259,7 @@
             // Recent expenses list
             const expContainer = document.getElementById('expenseHistoryList');
             if (expContainer) {
-                expContainer.innerHTML = appState.expenses.slice(0, 6).map(item => `
+                expContainer.innerHTML = [...dailySynced().foodItems, ...appState.expenses].slice(0, 6).map(item => `
                     <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
                         ${escapeHtml(item.note)}: -${formatPeso(item.cost)}
                     </span>
@@ -383,7 +415,7 @@
             const activeNote = appState.reminders[appState.activeReminderIndex] || "Tol wag muna, tipid tayo!";
             document.getElementById('modalTolReminderBox').textContent = `💬 "${activeNote}"`;
 
-            const foodRemaining = Math.max(0, (appState.foodInitialBudget || 0) - (appState.foodSpent || 0));
+            const foodRemaining = Math.max(0, (appState.foodInitialBudget || 0) - foodSpentAll());
             const adviceEl = document.getElementById('winnerBudgetAdvice');
             if (appState.foodInitialBudget <= 0) {
                 adviceEl.textContent = `Nanalo ang ${winner}! Mag-set ng budget sa Smart Tipid para ma-track ang gastos mo.`;
