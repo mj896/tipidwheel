@@ -22,3 +22,45 @@ input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none; 
     margin: 0; 
 }
+
+/* Vault / piggy bank */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.pig-coin { position: absolute; left: 50%; top: 36px; width: 28px; height: 28px; margin-left: -14px; border-radius: 9999px; opacity: 0; z-index: 1;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #92400e;
+    background: radial-gradient(circle at 30% 30%, #fde68a, #f59e0b); box-shadow: inset 0 0 0 2px #d97706; }
+.coin-in { animation: coinIn 1s ease-in forwards; }
+.coin-out { animation: coinOut 1.2s ease-out forwards; }
+@keyframes coinIn {
+    0% { opacity: 0; transform: translateY(-20px) rotateY(0) scale(1); }
+    15% { opacity: 1; }
+    75% { opacity: 1; transform: translateY(42px) rotateY(540deg) scale(.9); }
+    100% { opacity: 0; transform: translateY(52px) rotateY(720deg) scale(.4); }
+}
+@keyframes coinOut {
+    0% { opacity: 1; transform: translate(0, 52px) scale(.4); }
+    40% { opacity: 1; transform: translate(calc(var(--dx) * .5), -14px) rotate(180deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), 90px) rotate(540deg); }
+}
+.pig-jiggle { animation: pigJiggle .7s ease-out; }
+.pig-shake { animation: pigShake .5s ease-in-out; }
+@keyframes pigJiggle { 0%,100% { transform: none; } 25% { transform: scale(1.06,.92); } 50% { transform: scale(.97,1.06); } 75% { transform: scale(1.02,.98); } }
+@keyframes pigShake { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-5deg); } 40% { transform: rotate(5deg); } 60% { transform: rotate(-3deg); } 80% { transform: rotate(3deg); } }
+.pig-eye { transform-box: fill-box; transform-origin: center; animation: pigBlink 4.5s infinite; }
+@keyframes pigBlink { 0%,94%,100% { transform: scaleY(1); } 97% { transform: scaleY(.1); } }
+@media (prefers-reduced-motion: reduce) { .pig-coin, .pig-jiggle, .pig-shake, .pig-eye { animation: none !important; } }
+
+/* Login / Register */
+.auth-bg { background: radial-gradient(circle at 15% 12%, rgba(16,185,129,.35), transparent 45%), radial-gradient(circle at 88% 92%, rgba(245,158,11,.28), transparent 45%), linear-gradient(160deg, #04251f, #064e3b 55%, #0f766e); }
+.auth-deco { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+.auth-wheel { position: absolute; width: min(120vw, 760px); aspect-ratio: 1; right: -28%; top: -20%; border-radius: 50%; opacity: .3;
+    background: conic-gradient(#ef4444 0 16.66%, #f59e0b 0 33.33%, #10b981 0 50%, #3b82f6 0 66.66%, #8b5cf6 0 83.33%, #ec4899 0);
+    -webkit-mask: radial-gradient(circle, transparent 11%, #000 11.5%); mask: radial-gradient(circle, transparent 11%, #000 11.5%);
+    animation: authSpin 70s linear infinite; }
+.auth-coin { position: absolute; bottom: -40px; width: 26px; height: 26px; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; color: #92400e; background: radial-gradient(circle at 30% 30%, #fde68a, #f59e0b); box-shadow: inset 0 0 0 2px #d97706; opacity: 0; animation: authRise linear infinite; }
+.auth-bob { animation: authBob 3s ease-in-out infinite; }
+@keyframes authSpin { to { transform: rotate(360deg); } }
+@keyframes authRise { 0% { transform: translateY(0) rotate(0); opacity: 0; } 10% { opacity: .85; } 90% { opacity: .85; } 100% { transform: translateY(-115vh) rotate(540deg); opacity: 0; } }
+@keyframes authBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@media (prefers-reduced-motion: reduce) { .auth-wheel, .auth-coin, .auth-bob { animation: none !important; } }
