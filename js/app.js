@@ -65,9 +65,12 @@
         // Temporary holder for uploaded compressed photo DataURL
         let pendingToyPhotoDataUrl = "";
 
+        let STATE_KEY = 'tipidwheel_state_v1';
+        try { const su = localStorage.getItem('tipidwheel_session'); if (su) STATE_KEY = 'tipidwheel_state_u_' + su; } catch (e) {}
+
         function saveState() {
             try {
-                localStorage.setItem('tipidwheel_state_v1', JSON.stringify(appState));
+                localStorage.setItem(STATE_KEY, JSON.stringify(appState));
             } catch (err) {
                 console.warn('Could not save state to localStorage:', err);
             }
@@ -75,7 +78,7 @@
 
         function loadState() {
             try {
-                const raw = localStorage.getItem('tipidwheel_state_v1');
+                const raw = localStorage.getItem(STATE_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     appState = {
@@ -880,7 +883,7 @@
             const reset = document.getElementById('resetAllBtn');
             if (reset) reset.addEventListener('click', () => {
                 if (confirm('Burahin lahat ng data (budget, events, avatar, collection)?')) {
-                    try { localStorage.removeItem('tipidwheel_state_v1'); } catch (e) {}
+                    try { localStorage.removeItem(STATE_KEY); } catch (e) {}
                     location.reload();
                 }
             });
