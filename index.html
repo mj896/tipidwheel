@@ -797,16 +797,22 @@
                     <h2 id="dailyGreeting" class="text-lg font-extrabold">Kumusta!</h2>
                     <button onclick="logoutUser()" class="text-xs font-bold text-rose-500"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </div>
-                <label class="block text-xs font-bold mt-4 mb-1">Cash na dala mo ngayon (₱)</label>
+                <label class="block text-xs font-bold mt-4 mb-1">Cash na dala mo ngayon (₱) <span class="font-normal text-slate-400">- galing sa Smart Tipid</span></label>
                 <div class="flex gap-2">
                     <input id="dailyCashInput" type="number" inputmode="decimal" min="0" placeholder="e.g. 300" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
                     <select id="mealsPerDay" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl !w-auto"><option value="1">1 kain</option><option value="2">2 kain</option><option value="3" selected>3 kain</option><option value="4">4 kain</option></select>
                     <button onclick="saveDailyCash()" class="px-4 rounded-xl bg-emerald-500 text-white text-sm font-bold">I-set</button>
                 </div>
+                <div id="smartHint" class="mt-2 text-[11px] text-slate-500 dark:text-slate-400"></div>
                 <label class="block text-xs font-bold mt-3 mb-1">Target ipon ngayong araw (₱) <span class="font-normal text-slate-400">- sa pagkain kukunin, hindi sa pamasahe</span></label>
                 <input id="dailyGoalInput" type="number" inputmode="decimal" min="0" placeholder="Blanko = 20% ng cash" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
                 <div class="mt-4 rounded-2xl p-4 bg-emerald-50 dark:bg-emerald-950/40 text-center"><div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">👛 Pera mo ngayon</div><div id="dailyNowText" class="text-3xl font-extrabold">₱0.00</div><div id="dailyNowSub" class="text-[11px] text-slate-500 dark:text-slate-400"></div></div>
                 <div id="dailyBreakdown" class="mt-3 grid grid-cols-3 gap-2 text-center"></div>
+                <form onsubmit="logMeal(event)" class="mt-4 p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/50">
+                    <div class="text-xs font-bold mb-2">🍽️ Kumain ako! Saan at magkano?</div>
+                    <div class="flex gap-2"><input id="eatName" list="mealNames" placeholder="Saan? (e.g. Jollibee)" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"><input id="eatPrice" type="number" inputmode="decimal" min="0" placeholder="₱179" class="w-24 shrink-0 px-3 py-2.5 text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"><button class="px-3 rounded-xl bg-amber-500 text-white text-sm font-bold">Itala</button></div>
+                    <datalist id="mealNames"></datalist>
+                </form>
                 <div id="spendList" class="mt-3"></div>
                 <form onsubmit="addOtherSpend(event)" class="flex gap-2 mt-2"><input id="otherNote" placeholder="Iba pang gastos (load, tubig...)" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"><input id="otherAmt" type="number" inputmode="decimal" min="0" placeholder="₱" class="w-24 shrink-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"><button class="px-3 rounded-xl bg-slate-800 dark:bg-slate-700 text-white text-sm font-bold">−</button></form>
                 <button id="toVaultBtn" onclick="moveLeftoverToVault()" class="hidden mt-3 w-full py-2.5 rounded-xl bg-pink-500 text-white text-sm font-bold"></button>
@@ -963,9 +969,22 @@
     </div>
 
     <!-- LOGIN / REGISTER (naka-save sa device na ito) -->
-    <div id="authOverlay" class="hidden fixed inset-0 z-[60] bg-slate-50 dark:bg-slate-950 items-center justify-center p-4">
-        <form onsubmit="submitAuth(event)" class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-3">
-            <h1 class="text-xl font-extrabold text-center">💸 TipidWheel</h1>
+    <div id="authOverlay" class="auth-bg hidden fixed inset-0 z-[60] p-4 overflow-y-auto">
+        <div class="auth-deco" aria-hidden="true">
+            <div class="auth-wheel"></div>
+            <span class="auth-coin" style="left:8%;animation-duration:11s;animation-delay:0s">₱</span>
+            <span class="auth-coin" style="left:22%;animation-duration:14s;animation-delay:3s">₱</span>
+            <span class="auth-coin" style="left:41%;animation-duration:10s;animation-delay:6s">₱</span>
+            <span class="auth-coin" style="left:63%;animation-duration:13s;animation-delay:1.5s">₱</span>
+            <span class="auth-coin" style="left:78%;animation-duration:12s;animation-delay:4.5s">₱</span>
+            <span class="auth-coin" style="left:92%;animation-duration:15s;animation-delay:8s">₱</span>
+        </div>
+        <form onsubmit="submitAuth(event)" class="relative z-10 m-auto w-full max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl shadow-black/40 border border-white/40 dark:border-slate-700/70 space-y-3">
+            <div class="text-center pb-1">
+                <div class="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-3xl shadow-lg shadow-emerald-500/40 auth-bob"><i class="fa-solid fa-piggy-bank"></i></div>
+                <h1 class="text-2xl font-extrabold mt-3 bg-gradient-to-r from-emerald-600 to-amber-500 bg-clip-text text-transparent">TipidWheel</h1>
+                <p id="authSub" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Welcome back! Tuloy ang pag-iipon.</p>
+            </div>
             <input id="authUser" autocomplete="username" autocapitalize="none" placeholder="Username" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
             <input id="authPass" type="password" autocomplete="current-password" placeholder="Password" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
             <div id="authRegisterFields" class="hidden space-y-3">
@@ -976,7 +995,7 @@
                 </div>
             </div>
             <p id="authMsg" class="text-xs text-rose-500 min-h-[1rem]"></p>
-            <button id="authSubmitBtn" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-bold">Mag-Login</button>
+            <button id="authSubmitBtn" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold shadow-lg shadow-emerald-500/30 active:scale-[.98] transition">Mag-Login</button>
             <button type="button" id="authSwitchBtn" onclick="setAuthMode(authMode==='login'?'register':'login')" class="w-full text-xs font-bold text-emerald-600 dark:text-emerald-400">Wala pang account? Mag-register</button>
             <p class="text-[10px] text-slate-400 text-center">Ang account ay naka-save sa phone/browser na ito lang.</p>
         </form>
