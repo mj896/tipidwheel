@@ -1,6 +1,6 @@
 // Offline support: cache lahat ng files (pati CDN libraries) para gumana kahit walang internet.
-const CACHE = 'tipidwheel-v2';
-const LOCAL = ['./', 'index.html', 'css/style.css', 'js/tailwind-config.js', 'js/app.js', 'js/features.js', 'js/pwa.js',
+const CACHE = 'tipidwheel-v5';
+const LOCAL = ['./', 'index.html', 'css/style.css', 'js/tailwind-config.js', 'js/app.js', 'js/features.js', 'js/vault.js', 'js/pwa.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 const CDN = [
   'https://cdn.tailwindcss.com',
