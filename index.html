@@ -62,6 +62,10 @@
                 </button>
             </div>
         </div>
+        <div class="max-w-7xl mx-auto mt-2 grid grid-cols-2 gap-2 text-[11px]">
+            <button onclick="switchMainTab('daily')" class="flex items-center justify-between px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/70"><span class="font-semibold text-slate-600 dark:text-slate-300">👛 Pera ko ngayon</span><span id="monNow" class="font-extrabold">₱0.00</span></button>
+            <button onclick="switchMainTab('vault')" class="flex items-center justify-between px-3 py-1.5 rounded-xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-900/60"><span class="font-semibold text-slate-600 dark:text-slate-300">🐷 Vault</span><span id="monVault" class="font-extrabold text-pink-600 dark:text-pink-400">₱0.00</span></button>
+        </div>
     </header>
 
     <!-- Main Dashboard Container -->
@@ -142,25 +146,28 @@
         <!-- ========================================================= -->
         <!-- UNIFIED NAVIGATION TABS (Desktop & Mobile)                -->
         <!-- ========================================================= -->
-        <nav class="grid grid-cols-2 sm:grid-cols-6 gap-2 p-1.5 bg-slate-200/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
-            <button id="navTab-budget" onclick="switchMainTab('budget')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm transition flex items-center justify-center gap-2">
+        <nav class="flex gap-2 overflow-x-auto no-scrollbar p-1.5 bg-slate-200/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+            <button id="navTab-budget" onclick="switchMainTab('budget')" class="shrink-0 flex-1 whitespace-nowrap py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-wallet"></i> <span>Smart Tipid</span>
             </button>
-            <button id="navTab-daily" onclick="switchMainTab('daily')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+            <button id="navTab-daily" onclick="switchMainTab('daily')" class="shrink-0 flex-1 whitespace-nowrap py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-sun"></i> <span>Ngayong Araw</span>
             </button>
-            <button id="navTab-wheel" onclick="switchMainTab('wheel')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+            <button id="navTab-vault" onclick="switchMainTab('vault')" class="shrink-0 flex-1 whitespace-nowrap py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-piggy-bank"></i> <span>Vault</span>
+            </button>
+            <button id="navTab-wheel" onclick="switchMainTab('wheel')" class="shrink-0 flex-1 whitespace-nowrap py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-utensils"></i> <span>Spin Wheel</span>
             </button>
-            <button id="navTab-collection" onclick="switchMainTab('collection')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+            <button id="navTab-collection" onclick="switchMainTab('collection')" class="shrink-0 flex-1 whitespace-nowrap py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-box-open"></i> <span>My Collection</span>
                 <span id="collectionCountBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500 text-white">0</span>
             </button>
-            <button id="navTab-calendar" onclick="switchMainTab('calendar')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+            <button id="navTab-calendar" onclick="switchMainTab('calendar')" class="shrink-0 flex-1 whitespace-nowrap py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-calendar-days"></i> <span>Events</span>
                 <span id="upcomingEventsBadge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white">0</span>
             </button>
-            <button id="navTab-avatar" onclick="switchMainTab('avatar')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
+            <button id="navTab-avatar" onclick="switchMainTab('avatar')" class="shrink-0 flex-1 whitespace-nowrap py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-user-astronaut"></i> <span>My Avatar</span>
             </button>
         </nav>
@@ -793,10 +800,16 @@
                 <label class="block text-xs font-bold mt-4 mb-1">Cash na dala mo ngayon (₱)</label>
                 <div class="flex gap-2">
                     <input id="dailyCashInput" type="number" inputmode="decimal" min="0" placeholder="e.g. 300" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
-                    <select id="mealsPerDay" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl !w-auto"><option value="2">2 kain</option><option value="3" selected>3 kain</option></select>
+                    <select id="mealsPerDay" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl !w-auto"><option value="1">1 kain</option><option value="2">2 kain</option><option value="3" selected>3 kain</option><option value="4">4 kain</option></select>
                     <button onclick="saveDailyCash()" class="px-4 rounded-xl bg-emerald-500 text-white text-sm font-bold">I-set</button>
                 </div>
-                <div id="dailyBreakdown" class="mt-4 grid grid-cols-3 gap-2 text-center"></div>
+                <label class="block text-xs font-bold mt-3 mb-1">Target ipon ngayong araw (₱) <span class="font-normal text-slate-400">- sa pagkain kukunin, hindi sa pamasahe</span></label>
+                <input id="dailyGoalInput" type="number" inputmode="decimal" min="0" placeholder="Blanko = 20% ng cash" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                <div class="mt-4 rounded-2xl p-4 bg-emerald-50 dark:bg-emerald-950/40 text-center"><div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">👛 Pera mo ngayon</div><div id="dailyNowText" class="text-3xl font-extrabold">₱0.00</div><div id="dailyNowSub" class="text-[11px] text-slate-500 dark:text-slate-400"></div></div>
+                <div id="dailyBreakdown" class="mt-3 grid grid-cols-3 gap-2 text-center"></div>
+                <div id="spendList" class="mt-3"></div>
+                <form onsubmit="addOtherSpend(event)" class="flex gap-2 mt-2"><input id="otherNote" placeholder="Iba pang gastos (load, tubig...)" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"><input id="otherAmt" type="number" inputmode="decimal" min="0" placeholder="₱" class="w-24 shrink-0 px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"><button class="px-3 rounded-xl bg-slate-800 dark:bg-slate-700 text-white text-sm font-bold">−</button></form>
+                <button id="toVaultBtn" onclick="moveLeftoverToVault()" class="hidden mt-3 w-full py-2.5 rounded-xl bg-pink-500 text-white text-sm font-bold"></button>
             </div>
             <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800">
                 <div class="flex items-center justify-between"><h3 class="font-extrabold">🚌 Pamasahe ngayon</h3><b id="fareTotalText" class="text-amber-600 dark:text-amber-400">₱0.00</b></div>
@@ -812,6 +825,7 @@
                 <h3 class="font-extrabold mb-2">🍽️ Saan pwedeng kumain na pasok sa budget?</h3>
                 <div id="mealRecs"></div>
                 <button id="useRecsBtn" onclick="useRecsInWheel()" class="hidden mt-3 w-full py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold">🎡 Gamitin sa Spin Wheel</button>
+                <button id="restoreMealsBtn" onclick="restoreMeals()" class="hidden mt-2 w-full text-xs font-bold text-slate-500">↺ Ibalik ang mga tinago kong suggestion</button>
                 <p class="text-[10px] text-slate-400 mt-3">Tantyang presyo lang ito at pwedeng iba sa branch o promo. Idagdag ang sarili mong kainan at presyo:</p>
                 <form onsubmit="addCustomMeal(event)" class="flex gap-2 mt-2">
                     <input id="customMealName" placeholder="Pangalan ng kainan/meal" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
@@ -819,6 +833,46 @@
                     <button class="px-3 rounded-xl bg-slate-800 dark:bg-slate-700 text-white text-sm font-bold">+</button>
                 </form>
                 <div id="customMealChips" class="mt-2 flex flex-wrap gap-2"></div>
+            </div>
+        </section>
+
+        <!-- ========== VAULT / PIGGY BANK ========== -->
+        <section id="vaultSection" class="hidden space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800 text-center">
+                <div id="pigWrap" class="relative mx-auto w-64 max-w-full pt-14">
+                    <svg id="pigSvg" viewBox="0 0 220 160" class="w-full block" style="transform-origin:50% 90%" role="img" aria-label="Piggy bank">
+                        <ellipse cx="110" cy="153" rx="70" ry="6" fill="rgba(0,0,0,.12)"/>
+                        <path d="M42 80 q-22 -6 -18 -24 q4 -8 12 -2" fill="none" stroke="#f472b6" stroke-width="6" stroke-linecap="round"/>
+                        <rect x="68" y="118" width="24" height="33" rx="9" fill="#f472b6"/><rect x="132" y="118" width="24" height="33" rx="9" fill="#f472b6"/>
+                        <ellipse cx="108" cy="82" rx="72" ry="48" fill="#f9a8d4"/>
+                        <path d="M138 44 L150 18 L166 50Z" fill="#f472b6"/>
+                        <ellipse cx="180" cy="92" rx="17" ry="13" fill="#f472b6"/>
+                        <circle cx="175" cy="92" r="2.6" fill="#9d174d"/><circle cx="186" cy="92" r="2.6" fill="#9d174d"/>
+                        <circle class="pig-eye" cx="158" cy="70" r="4.5" fill="#1f2937"/>
+                        <circle cx="150" cy="88" r="7" fill="#fb7185" opacity=".45"/>
+                        <rect x="88" y="36" width="40" height="7" rx="3.5" fill="#9d174d"/>
+                    </svg>
+                </div>
+                <div id="vaultBalance" class="text-4xl font-extrabold text-pink-600 dark:text-pink-400">₱0.00</div>
+                <p class="text-xs text-slate-400 mb-4">Ipon mo sa Vault</p>
+                <div class="flex gap-2">
+                    <input id="vaultAmount" type="number" inputmode="decimal" min="0" placeholder="Magkano?" class="w-28 shrink-0 px-3 py-2.5 text-sm font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                    <input id="vaultNote" placeholder="Para saan? (optional)" class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                </div>
+                <div class="flex gap-2 mt-2 justify-center">
+                    <button onclick="setVaultAmt(50)" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800">₱50</button>
+                    <button onclick="setVaultAmt(100)" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800">₱100</button>
+                    <button onclick="setVaultAmt(500)" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800">₱500</button>
+                    <button onclick="setVaultAmt(1000)" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800">₱1,000</button>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mt-3">
+                    <button onclick="vaultDeposit()" class="col-span-2 py-3 rounded-xl bg-emerald-500 text-white text-sm font-bold">🪙 Ilagay sa Vault</button>
+                    <button onclick="vaultWithdraw()" class="py-3 rounded-xl border border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-sm font-bold">🔒 Kuha</button>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-800">
+                <h3 class="font-extrabold mb-2">Kasaysayan</h3>
+                <div id="vaultHistory"></div>
             </div>
         </section>
     </main>
@@ -869,7 +923,7 @@
             <!-- Optional Quick Deduct directly from Winner Modal -->
             <div class="mb-5 text-left bg-amber-50/70 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200/70 dark:border-amber-900/50">
                 <label class="block text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase mb-1.5">
-                    Ibawas agad sa Food Budget? (Optional)
+                    Magkano ang kakainin mo? (pwedeng baguhin)
                 </label>
                 <div class="flex gap-2">
                     <div class="relative flex-1">
@@ -877,18 +931,16 @@
                         <input type="number" id="modalDeductInput" placeholder="e.g. 120" min="1"
                             class="w-full pl-7 pr-3 py-2 text-sm font-bold bg-white dark:bg-slate-900 border border-amber-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500" />
                     </div>
-                    <button onclick="deductWinnerExpense()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
-                        Save & Bawas
-                    </button>
+                    
                 </div>
             </div>
 
             <div class="flex gap-3">
                 <button onclick="closeWinnerModal(); spinWheel();" class="flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold transition">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> Spin Ulit
+                    ❌ No, spin ulit
                 </button>
-                <button onclick="closeWinnerModal()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md shadow-amber-500/20 transition">
-                    G na! Kain na!
+                <button onclick="wheelGo()" class="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md shadow-amber-500/20 transition">
+                    ✅ GO! Kain na
                 </button>
             </div>
         </div>
@@ -897,6 +949,18 @@
     <!-- Custom Toast Notification (Replaces alert() for messages/errors) -->
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+
+    <div id="confirmModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div id="confirmIcon" class="text-4xl mb-2">🐷</div>
+            <h3 id="confirmTitle" class="text-lg font-extrabold"></h3>
+            <p id="confirmMsg" class="text-sm text-slate-600 dark:text-slate-300 mt-2 mb-5"></p>
+            <div class="flex gap-3">
+                <button id="confirmNo" onclick="closeConfirm(false)" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm font-bold"></button>
+                <button id="confirmYes" onclick="closeConfirm(true)"></button>
+            </div>
+        </div>
+    </div>
 
     <!-- LOGIN / REGISTER (naka-save sa device na ito) -->
     <div id="authOverlay" class="hidden fixed inset-0 z-[60] bg-slate-50 dark:bg-slate-950 items-center justify-center p-4">
@@ -920,6 +984,7 @@
     <!-- Application Logic -->
     <script src="js/app.js"></script>
     <script src="js/features.js"></script>
+    <script src="js/vault.js"></script>
     <script src="js/pwa.js"></script>
 </body>
 </html>
